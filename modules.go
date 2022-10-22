@@ -9,5 +9,5 @@ type IApiModule interface {
 }
 
 type IWorkerModule interface {
-	Start()
+	Run()
 }

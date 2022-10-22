@@ -7,7 +7,7 @@ type App struct {
 	basePath      string
 }
 
-func (app *App) Start() {
+func (app *App) Run() {
 	var forever chan struct{}
 	go app.runAPI()
 	go app.runWorkers()
@@ -29,7 +29,7 @@ func (app *App) runAPI() {
 
 func (app *App) runWorkers() {
 	for _, workerModule := range app.workerModules {
-		go workerModule.Start()
+		go workerModule.Run()
 	}
 }
 
