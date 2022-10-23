@@ -14,27 +14,27 @@ API modules must implement the `IApiModule` interface, and have a constructor fu
 package awesomeapimodule
 
 import (
-	"github.com/gin-gonic/gin"
-	modules "github.com/mitz-it/golang-modules"
-	"go.uber.org/dig"
+ "github.com/gin-gonic/gin"
+ modules "github.com/mitz-it/golang-modules"
+ "go.uber.org/dig"
 )
 
 type AwesomeApiModule struct {
-	container *dig.Container
+ container *dig.Container
 }
 
 func (module *AwesomeApiModule) Register(group *gin.RouterGroup) {
-	group.GET("/awesome-people", func(ctx *gin.Context) {
-		// ...
-	})
-	group.POST("/awesome-people", func(ctx *gin.Context) {
-		// ...
-	})
+ group.GET("/awesome-people", func(ctx *gin.Context) {
+  // ...
+ })
+ group.POST("/awesome-people", func(ctx *gin.Context) {
+  // ...
+ })
 }
 
 func NewAwesomeModule(container *dig.Container) modules.IApiModule {
-	return &AwesomeApiModule{
-		container: container,
-	}
+ return &AwesomeApiModule{
+  container: container,
+ }
 }
 ```
