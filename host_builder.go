@@ -18,7 +18,7 @@ func (builder *HostBuilder) AddModule(configure ConfigureModule) {
 }
 
 func (builder *HostBuilder) Build() *Host {
-	api := builder.createAPI()
+	api := builder.buildAPI()
 
 	workers := newWorkers()
 
@@ -37,7 +37,7 @@ func (builder *HostBuilder) Build() *Host {
 	return host
 }
 
-func (builder *HostBuilder) createAPI() *API {
+func (builder *HostBuilder) buildAPI() *API {
 	if builder.configureAPI == nil {
 		return nil
 	}
