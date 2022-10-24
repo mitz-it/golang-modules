@@ -1,12 +1,14 @@
 package modules
 
+import "errors"
+
 type HostBuilder struct {
 	configurations []*ModuleConfiguration
-	api            *API
+	configureAPI   *ConfigureAPIFunc
 }
 
-func (builder *HostBuilder) UseSwaggerHandler() {
-	builder.api.useSwaggerHandler()
+func (builder *HostBuilder) ConfigureAPI(configure ConfigureAPIFunc) {
+	builder.configureAPI = &configure
 }
 
 func (builder *HostBuilder) AddModule(configure ConfigureModule) {
@@ -14,29 +16,44 @@ func (builder *HostBuilder) AddModule(configure ConfigureModule) {
 
 	configure(config)
 
-	// if config.name == "" {
-	// 	// TODO: panic, name cannot be empty
-	// }
+	if config.name == "" {
+		err := errors.New("module name cannot be empyt")
+		panic(err)
+	}
 
-	// if config.container == nil {
-	// 	// TODO: panic, container cannot be nil
-	// }
+	if config.container == nil {
+		err := errors.New("di container cannot be nil")
+		panic(err)
+	}
 
 	builder.configurations = append(builder.configurations, config)
 }
 
 func (builder *HostBuilder) Build() *Host {
+	api := new(API)
+
+	if builder.configureAPI != nil {
+		api = newAPI()
+		configureAPI := *builder.configureAPI
+		configureAPI(api)
+		api.validate()
+		api.buildRootGroup()
+	}
+
 	workers := make([]IWorker, 0)
 
 	for _, config := range builder.configurations {
 		container := config.container
-		name := config.name
 
-		group := builder.api.rootGroup.Group(name)
+		if api != nil {
+			name := config.name
 
-		for _, controllerFunc := range config.controllersFunc {
-			controller := controllerFunc(container)
-			controller.Register(group)
+			group := api.rootGroup.Group(name)
+
+			for _, controllerFunc := range config.controllersFunc {
+				controller := controllerFunc(container)
+				controller.Register(group)
+			}
 		}
 
 		for _, workersFunc := range config.workersFunc {
@@ -45,15 +62,14 @@ func (builder *HostBuilder) Build() *Host {
 		}
 	}
 
-	host := NewHost(builder.api, workers)
+	host := NewHost(api, workers)
 	return host
 }
 
 func NewHostBuilder() *HostBuilder {
-	api := NewAPI()
 	configurations := make([]*ModuleConfiguration, 0)
 	return &HostBuilder{
-		api:            api,
+		configureAPI:   nil,
 		configurations: configurations,
 	}
 }

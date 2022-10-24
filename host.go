@@ -7,7 +7,10 @@ type Host struct {
 
 func (host *Host) Run() {
 	var forever chan struct{}
-	go host.api.Run()
+
+	if host.api != nil {
+		go host.api.run()
+	}
 
 	for _, worker := range host.workers {
 		go worker.Run()
