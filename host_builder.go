@@ -10,7 +10,7 @@ func (builder *HostBuilder) ConfigureAPI(configure ConfigureAPIFunc) {
 }
 
 func (builder *HostBuilder) AddModule(configure ConfigureModule) {
-	config := NewModuleConfiguration()
+	config := newModuleConfiguration()
 
 	configure(config)
 
@@ -18,42 +18,39 @@ func (builder *HostBuilder) AddModule(configure ConfigureModule) {
 }
 
 func (builder *HostBuilder) Build() *Host {
-	var api *API
+	api := builder.createAPI()
 
-	if builder.configureAPI != nil {
-		api = newAPI()
-		configureAPI := *builder.configureAPI
-		configureAPI(api)
-		api.validate()
-		api.buildRootGroup()
-	}
-
-	workers := make([]IWorker, 0)
+	workers := newWorkers()
 
 	for _, config := range builder.configurations {
 		config.validate()
 
-		container := config.container
-
 		if api != nil {
-			name := config.name
-
-			group := api.rootGroup.Group(name)
-
-			for _, controllerFunc := range config.controllersFunc {
-				controller := controllerFunc(container)
-				controller.Register(group)
-			}
+			config.registerControllers(api)
 		}
 
-		for _, workersFunc := range config.workersFunc {
-			worker := workersFunc(container)
-			workers = append(workers, worker)
-		}
+		moduleWorkers := config.createWorkers()
+		workers = append(workers, moduleWorkers...)
 	}
 
 	host := NewHost(api, workers)
 	return host
+}
+
+func (builder *HostBuilder) createAPI() *API {
+	if builder.configureAPI == nil {
+		return nil
+	}
+
+	api := NewAPI()
+
+	configureAPI := *builder.configureAPI
+	configureAPI(api)
+
+	api.validate()
+	api.configure()
+
+	return api
 }
 
 func NewHostBuilder() *HostBuilder {

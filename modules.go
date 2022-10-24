@@ -43,7 +43,28 @@ func (config *ModuleConfiguration) validate() {
 	}
 }
 
-func NewModuleConfiguration() *ModuleConfiguration {
+func (config *ModuleConfiguration) registerControllers(api *API) {
+	name := config.name
+	container := config.container
+	group := api.rootGroup.Group(name)
+
+	for _, controllerFunc := range config.controllersFunc {
+		controller := controllerFunc(container)
+		controller.Register(group)
+	}
+}
+
+func (config *ModuleConfiguration) createWorkers() []IWorker {
+	workers := newWorkers()
+	container := config.container
+	for _, workersFunc := range config.workersFunc {
+		worker := workersFunc(container)
+		workers = append(workers, worker)
+	}
+	return workers
+}
+
+func newModuleConfiguration() *ModuleConfiguration {
 	config := new(ModuleConfiguration)
 	config.controllersFunc = make([]ControllerConstructorFunc, 0)
 	config.workersFunc = make([]WorkerConstructorFunc, 0)
