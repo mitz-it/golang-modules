@@ -1,13 +1,35 @@
 package modules
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "go.uber.org/dig"
 
-type IApiModule interface {
-	Register(group *gin.RouterGroup)
+type ConfigureModule func(config *ModuleConfiguration)
+
+type ModuleConfiguration struct {
+	name            string
+	controllersFunc []ControllerConstructorFunc
+	workersFunc     []WorkerConstructorFunc
+	container       *dig.Container
 }
 
-type IWorkerModule interface {
-	Run()
+func (config *ModuleConfiguration) WithName(name string) {
+	config.name = name
+}
+
+func (config *ModuleConfiguration) AddController(controllerFunc ControllerConstructorFunc) {
+	config.controllersFunc = append(config.controllersFunc, controllerFunc)
+}
+
+func (config *ModuleConfiguration) AddWorker(workerFunc WorkerConstructorFunc) {
+	config.workersFunc = append(config.workersFunc, workerFunc)
+}
+
+func (config *ModuleConfiguration) WithDIContainer(container *dig.Container) {
+	config.container = container
+}
+
+func NewModuleConfiguration() *ModuleConfiguration {
+	config := new(ModuleConfiguration)
+	config.controllersFunc = make([]ControllerConstructorFunc, 0)
+	config.workersFunc = make([]WorkerConstructorFunc, 0)
+	return config
 }
