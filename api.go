@@ -29,11 +29,6 @@ func (api *API) WithBasePath(basePath string) {
 }
 
 func (api *API) validate() {
-	if api.basePath == "" {
-		err := errors.New("base path cannot be empty")
-		panic(err)
-	}
-
 	if api.useSwagger {
 		if api.swaggerSpec == nil {
 			err := errors.New("swag spec cannot be nil")
@@ -60,7 +55,8 @@ func (api *API) run() {
 func NewAPI() *API {
 	router := gin.Default()
 	return &API{
-		router:   router,
-		basePath: "/api",
+		router:     router,
+		basePath:   "/api",
+		useSwagger: false,
 	}
 }

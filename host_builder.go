@@ -3,6 +3,11 @@ package modules
 type HostBuilder struct {
 	configurations []*ModuleConfiguration
 	configureAPI   *ConfigureAPIFunc
+	useAPI         bool
+}
+
+func (builder *HostBuilder) UseAPI(useAPI bool) {
+	builder.useAPI = useAPI
 }
 
 func (builder *HostBuilder) ConfigureAPI(configure ConfigureAPIFunc) {
@@ -38,14 +43,16 @@ func (builder *HostBuilder) Build() *Host {
 }
 
 func (builder *HostBuilder) buildAPI() *API {
-	if builder.configureAPI == nil {
+	if !builder.useAPI {
 		return nil
 	}
 
 	api := NewAPI()
 
-	configureAPI := *builder.configureAPI
-	configureAPI(api)
+	if builder.configureAPI == nil {
+		configureAPI := *builder.configureAPI
+		configureAPI(api)
+	}
 
 	api.validate()
 	api.configure()
@@ -58,5 +65,6 @@ func NewHostBuilder() *HostBuilder {
 	return &HostBuilder{
 		configureAPI:   nil,
 		configurations: configurations,
+		useAPI:         true,
 	}
 }
