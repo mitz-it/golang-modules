@@ -49,7 +49,7 @@ func (builder *HostBuilder) buildAPI() *API {
 
 	api := NewAPI()
 
-	if builder.configureAPI == nil {
+	if builder.configureAPI != nil {
 		configureAPI := *builder.configureAPI
 		configureAPI(api)
 	}
