@@ -1,7 +1,5 @@
 package modules
 
-import "errors"
-
 type HostBuilder struct {
 	configurations []*ModuleConfiguration
 	configureAPI   *ConfigureAPIFunc
@@ -16,21 +14,11 @@ func (builder *HostBuilder) AddModule(configure ConfigureModule) {
 
 	configure(config)
 
-	if config.name == "" {
-		err := errors.New("module name cannot be empyt")
-		panic(err)
-	}
-
-	if config.container == nil {
-		err := errors.New("di container cannot be nil")
-		panic(err)
-	}
-
 	builder.configurations = append(builder.configurations, config)
 }
 
 func (builder *HostBuilder) Build() *Host {
-	api := new(API)
+	var api *API
 
 	if builder.configureAPI != nil {
 		api = newAPI()
@@ -43,6 +31,8 @@ func (builder *HostBuilder) Build() *Host {
 	workers := make([]IWorker, 0)
 
 	for _, config := range builder.configurations {
+		config.validate()
+
 		container := config.container
 
 		if api != nil {
