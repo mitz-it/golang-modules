@@ -2,6 +2,12 @@
 
 MitzIT microservices are built on top of one or multiple modules. Each module is an independent piece and has its own domain. This package allows registering modules to a single entry point and having it all started with one call.
 
+## Installation
+
+```bash
+go get -u github.com/mitz-it/golang-modules@v1.0.0
+```
+
 ## Usage
 
 ```go
