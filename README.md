@@ -5,7 +5,7 @@ MitzIT microservices are built on top of one or multiple modules. Each module is
 ## Installation
 
 ```bash
-go get -u github.com/mitz-it/golang-modules@v1.3.0
+go get -u github.com/mitz-it/golang-modules@v2.0.0
 ```
 
 ## Usage
