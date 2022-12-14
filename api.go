@@ -50,6 +50,10 @@ func (api *API) validate() {
 }
 
 func (api *API) configure() {
+	if api.otel_Enabled {
+		api.router.Use(otelgin.Middleware(api.otel_ServiceName, api.otel_Options...))
+	}
+
 	basePath := api.basePath
 	rootGroup := api.router.Group(basePath)
 	api.rootGroup = rootGroup
@@ -57,10 +61,6 @@ func (api *API) configure() {
 	if api.useSwagger {
 		api.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		api.swaggerSpec.BasePath = basePath
-	}
-
-	if api.otel_Enabled {
-		api.router.Use(otelgin.Middleware(api.otel_ServiceName, api.otel_Options...))
 	}
 }
 
