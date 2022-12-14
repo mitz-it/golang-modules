@@ -42,6 +42,7 @@ func main() {
   builder.ConfigureAPI(func(api *modules.API) {
     api.UseSwagger(docs.SwaggerInfo)
     api.WithBasePath("/api") // /api is the default base path
+    api.UseOpenTelemetryMiddleware("my-microservice") // enable otelgin middleware
   })
   host := builder.Build()
 
