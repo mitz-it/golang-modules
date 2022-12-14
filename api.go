@@ -26,9 +26,7 @@ type API struct {
 func (api *API) UseOpenTelemetryMiddleware(serviceName string, opts ...otelgin.Option) {
 	api.otel_Enabled = true
 	api.otel_ServiceName = serviceName
-	for _, option := range opts {
-		api.otel_Options = append(api.otel_Options, option)
-	}
+	api.otel_Options = append(api.otel_Options, opts...)
 }
 
 func (api *API) UseSwagger(spec *swag.Spec) {
