@@ -7,16 +7,28 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/swag"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 type ConfigureAPIFunc func(api *API)
 
 type API struct {
-	router      *gin.Engine
-	rootGroup   *gin.RouterGroup
-	basePath    string
-	swaggerSpec *swag.Spec
-	useSwagger  bool
+	router           *gin.Engine
+	rootGroup        *gin.RouterGroup
+	basePath         string
+	swaggerSpec      *swag.Spec
+	useSwagger       bool
+	otel_Enabled     bool
+	otel_Options     []otelgin.Option
+	otel_ServiceName string
+}
+
+func (api *API) UseOpenTelemetryMiddleware(serviceName string, opts ...otelgin.Option) {
+	api.otel_Enabled = true
+	api.otel_ServiceName = serviceName
+	for _, option := range opts {
+		api.otel_Options = append(api.otel_Options, option)
+	}
 }
 
 func (api *API) UseSwagger(spec *swag.Spec) {
@@ -38,6 +50,10 @@ func (api *API) validate() {
 }
 
 func (api *API) configure() {
+	if api.otel_Enabled {
+		api.router.Use(otelgin.Middleware(api.otel_ServiceName, api.otel_Options...))
+	}
+
 	basePath := api.basePath
 	rootGroup := api.router.Group(basePath)
 	api.rootGroup = rootGroup
