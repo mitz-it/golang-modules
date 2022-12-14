@@ -13,16 +13,22 @@ import (
 type ConfigureAPIFunc func(api *API)
 
 type API struct {
-	router             *gin.Engine
-	rootGroup          *gin.RouterGroup
-	basePath           string
-	swaggerSpec        *swag.Spec
-	useSwagger         bool
-	otelgin_middleware gin.HandlerFunc
+	router           *gin.Engine
+	rootGroup        *gin.RouterGroup
+	basePath         string
+	swaggerSpec      *swag.Spec
+	useSwagger       bool
+	otel_Enabled     bool
+	otel_Options     []otelgin.Option
+	otel_ServiceName string
 }
 
 func (api *API) UseOpenTelemetryMiddleware(serviceName string, opts ...otelgin.Option) {
-	api.otelgin_middleware = otelgin.Middleware(serviceName, opts...)
+	api.otel_Enabled = true
+	api.otel_ServiceName = serviceName
+	for _, option := range opts {
+		api.otel_Options = append(api.otel_Options, option)
+	}
 }
 
 func (api *API) UseSwagger(spec *swag.Spec) {
@@ -53,8 +59,8 @@ func (api *API) configure() {
 		api.swaggerSpec.BasePath = basePath
 	}
 
-	if api.otelgin_middleware != nil {
-		api.router.Use(api.otelgin_middleware)
+	if api.otel_Enabled {
+		api.router.Use(otelgin.Middleware(api.otel_ServiceName, api.otel_Options...))
 	}
 }
 
