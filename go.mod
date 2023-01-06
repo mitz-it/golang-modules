@@ -10,7 +10,7 @@ require (
 	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.8
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.37.0
-	go.uber.org/dig v1.15.0
+	go.uber.org/dig v1.16.0
 )
 
 require (
