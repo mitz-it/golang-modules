@@ -6,19 +6,25 @@ type Host struct {
 }
 
 func (host *Host) Run() {
+	host.invokeInitCalls()
+
 	var forever chan struct{}
 
 	for _, module := range host.modules {
-
-		module.invokeInitCalls()
-
 		go module.startWorkers()
 	}
 
 	if host.api != nil {
 		go host.api.run()
 	}
+
 	<-forever
+}
+
+func (host *Host) invokeInitCalls() {
+	for _, module := range host.modules {
+		module.invokeInitCalls()
+	}
 }
 
 func NewHost(api *API, modules []*Module) *Host {
