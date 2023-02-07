@@ -8,11 +8,14 @@ import (
 
 type ConfigureModule func(config *ModuleConfiguration)
 
+type InitCall func(container *dig.Container)
+
 type ModuleConfiguration struct {
 	name            string
 	controllersFunc []ControllerConstructorFunc
 	workersFunc     []WorkerConstructorFunc
 	container       *dig.Container
+	initCalls       []InitCall
 }
 
 func (config *ModuleConfiguration) WithName(name string) {
@@ -31,6 +34,10 @@ func (config *ModuleConfiguration) WithDIContainer(container *dig.Container) {
 	config.container = container
 }
 
+func (config *ModuleConfiguration) SetupInitCall(initCall InitCall) {
+	config.initCalls = append(config.initCalls, initCall)
+}
+
 func (config *ModuleConfiguration) validate() {
 	if config.name == "" {
 		err := errors.New("module name cannot be empyt")
@@ -43,30 +50,31 @@ func (config *ModuleConfiguration) validate() {
 	}
 }
 
-func (config *ModuleConfiguration) registerControllers(api *API) {
-	name := config.name
-	container := config.container
-	group := api.rootGroup.Group(name)
+func (config *ModuleConfiguration) build() *Module {
+	config.validate()
+	module := newModule(config.name, config.container)
 
 	for _, controllerFunc := range config.controllersFunc {
-		controller := controllerFunc(container)
-		controller.Register(group)
+		controller := controllerFunc(module.container)
+		module.appendControler(controller)
 	}
-}
 
-func (config *ModuleConfiguration) createWorkers() []IWorker {
-	workers := newWorkers()
-	container := config.container
-	for _, workersFunc := range config.workersFunc {
-		worker := workersFunc(container)
-		workers = append(workers, worker)
+	for _, workerFunc := range config.workersFunc {
+		worker := workerFunc(module.container)
+		module.appendWorker(worker)
 	}
-	return workers
+
+	for _, initCall := range config.initCalls {
+		module.appendInitCall(initCall)
+	}
+
+	return module
 }
 
 func newModuleConfiguration() *ModuleConfiguration {
 	config := new(ModuleConfiguration)
 	config.controllersFunc = make([]ControllerConstructorFunc, 0)
 	config.workersFunc = make([]WorkerConstructorFunc, 0)
+	config.initCalls = make([]InitCall, 0)
 	return config
 }
