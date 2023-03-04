@@ -25,20 +25,19 @@ func (builder *HostBuilder) AddModule(configure ConfigureModule) {
 func (builder *HostBuilder) Build() *Host {
 	api := builder.buildAPI()
 
-	workers := newWorkers()
+	modules := make([]*Module, 0)
 
 	for _, config := range builder.configurations {
-		config.validate()
+		module := config.build()
 
 		if api != nil {
-			config.registerControllers(api)
+			module.registerControllers(api)
 		}
 
-		moduleWorkers := config.createWorkers()
-		workers = append(workers, moduleWorkers...)
+		modules = append(modules, module)
 	}
 
-	host := NewHost(api, workers)
+	host := NewHost(api, modules)
 	return host
 }
 
