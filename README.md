@@ -5,7 +5,7 @@ MitzIT microservices are built on top of one or multiple modules. Each module is
 ## Installation
 
 ```bash
-go get -u github.com/mitz-it/golang-modules@v1.10.0
+go get -u github.com/mitz-it/golang-modules@v1.11.0
 ```
 
 ## Usage
@@ -234,5 +234,45 @@ func main() {
   host := builder.Build()
 
   host.Run()
+}
+```
+
+## Init Call
+
+You can invoke a function using the `*dig.Container`instance from a module before the application starts.
+
+```go
+package foomodule
+
+import (
+  modules "github.com/mitz-it/golang-modules"
+  os
+)
+
+func FooModule(config *modules.ModuleConfiguration) {
+  config.WithName("/foos")
+  di, container := NewDependencyInjectionContainer()
+  di.Setup()
+  config.WithDIContainer(container)
+  config.AddController(NewFoosController)
+  config.AddWorker(NewFooWorker)
+  config.SetupInitCall(migrateDatabase)
+}
+
+func migrateDatabase(container *dig.Container) {
+    env := os.GetEnv("APPLICATION_ENVIRONMENT")
+    if env != "dev" || env != "local" {
+      return
+    }
+    err := container.Invoke(func(db DatabaseProvider) {
+        if connection, err := db.Connect(); err == nil {
+            connection.Migrate()
+	  } else {
+	    panic(err)
+	  }
+    })
+    if err != nil {
+        panic(err)
+    }
 }
 ```
