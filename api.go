@@ -12,8 +12,11 @@ import (
 
 type ConfigureAPIFunc func(api *API)
 
+type RouterConfigFunc func(router *gin.Engine)
+
 type API struct {
 	router           *gin.Engine
+	configureRouter  RouterConfigFunc
 	rootGroup        *gin.RouterGroup
 	basePath         string
 	swaggerSpec      *swag.Spec
@@ -38,6 +41,10 @@ func (api *API) WithBasePath(basePath string) {
 	api.basePath = basePath
 }
 
+func (api *API) ConfigureRouter(configure RouterConfigFunc) {
+	api.configureRouter = configure
+}
+
 func (api *API) validate() {
 	if api.useSwagger {
 		if api.swaggerSpec == nil {
@@ -50,6 +57,10 @@ func (api *API) validate() {
 func (api *API) configure() {
 	if api.otel_Enabled {
 		api.router.Use(otelgin.Middleware(api.otel_ServiceName, api.otel_Options...))
+	}
+
+	if api.configureRouter != nil {
+		api.configureRouter(api.router)
 	}
 
 	basePath := api.basePath
