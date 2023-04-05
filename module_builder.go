@@ -39,11 +39,6 @@ func (config *ModuleConfiguration) SetupInitCall(initCall InitCall) {
 }
 
 func (config *ModuleConfiguration) validate() {
-	if config.name == "" {
-		err := errors.New("module name cannot be empyt")
-		panic(err)
-	}
-
 	if config.container == nil {
 		err := errors.New("di container cannot be nil")
 		panic(err)
@@ -73,6 +68,7 @@ func (config *ModuleConfiguration) build() *Module {
 
 func newModuleConfiguration() *ModuleConfiguration {
 	config := new(ModuleConfiguration)
+	config.name = ""
 	config.controllersFunc = make([]ControllerConstructorFunc, 0)
 	config.workersFunc = make([]WorkerConstructorFunc, 0)
 	config.initCalls = make([]InitCall, 0)
