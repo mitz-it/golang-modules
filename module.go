@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
 )
 
@@ -25,7 +26,13 @@ func (module *Module) appendInitCall(initCall InitCall) {
 }
 
 func (module *Module) registerControllers(api *API) {
-	group := api.rootGroup.Group(module.name)
+	var group *gin.RouterGroup
+
+	if module.name != "" {
+		group = api.rootGroup.Group(module.name)
+	} else {
+		group = api.rootGroup
+	}
 
 	for _, controller := range module.controllers {
 		controller.Register(group)
