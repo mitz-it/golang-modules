@@ -108,8 +108,6 @@ func NewDependencyInjectionContainer() (modules.IDependencyInjectionContainer, *
 }
 ```
 
-
-
 ## Controllers
 
 Controllers are a group of endpoints for the same **resource** or **collection**. To define a **controller** you need to implement the `IController` interface by adding the `Register(*gin.RouterGroup)` method to the **controller struct** and,
@@ -217,6 +215,10 @@ func PrivateGroupsModule(config *modules.ModuleConfiguration) {
   config.AddWorker(NewPrivateGroupRequestsWorker)
 }
 ```
+
+:warning: **FOR VERSIONS >= 1.13.0, MODULE NAMES ARE OPTIONAL** :warning:
+
+When a module is nameless, all endpoints are added to the root `*gin.RouterGroup`, which default path is `/api`.
 
 Register the `PrivateGroupsModule` function using the `HostBuilder` instance:
 
