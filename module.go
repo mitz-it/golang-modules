@@ -41,7 +41,20 @@ func (module *Module) registerControllers(api *API) {
 
 func (module *Module) startWorkers() {
 	for _, worker := range module.workers {
-		go worker.Run()
+		go func(worker IWorker) {
+			startWorker(worker)
+		}(worker)
+	}
+}
+
+func startWorker(worker IWorker) {
+	defer workerRecover(worker)
+	worker.Run()
+}
+
+func workerRecover(worker IWorker) {
+	if err := recover(); err != nil {
+		startWorker(worker)
 	}
 }
 

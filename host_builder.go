@@ -67,3 +67,12 @@ func NewHostBuilder() *HostBuilder {
 		useAPI:         true,
 	}
 }
+
+func NewHostBuilder2() *HostBuilder {
+	configurations := make([]*ModuleConfiguration, 0)
+	return &HostBuilder{
+		configureAPI:   nil,
+		configurations: configurations,
+		useAPI:         true,
+	}
+}
