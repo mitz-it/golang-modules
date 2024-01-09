@@ -45,10 +45,6 @@ func (api *API) validate() {
 }
 
 func (api *API) configure() {
-	if api.configureRouter != nil {
-		api.configureRouter(api.router)
-	}
-
 	basePath := api.basePath
 	rootGroup := api.router.Group(basePath)
 	api.rootGroup = rootGroup
@@ -56,6 +52,10 @@ func (api *API) configure() {
 	if api.useSwagger {
 		api.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		api.swaggerSpec.BasePath = basePath
+	}
+
+	if api.configureRouter != nil {
+		api.configureRouter(api.router)
 	}
 }
 
