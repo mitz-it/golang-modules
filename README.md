@@ -45,7 +45,6 @@ func main() {
   builder.ConfigureAPI(func(api *modules.API) {
     api.UseSwagger(docs.SwaggerInfo)
     api.WithBasePath("/api") // /api is the default base path
-    api.UseOpenTelemetryMiddleware("my-microservice") // enable otelgin middleware
     api.ConfigureRouter(func(router *gin.Engine) { // override router configurations
       router.Use(ginzap.Ginzap(logger.Log.Zap(), time.RFC3339, true))
       router.Use(ginzap.RecoveryWithZap(logger.Log.Zap(), true))
